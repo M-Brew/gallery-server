@@ -3,6 +3,7 @@ const { DeleteObjectCommand } = require("@aws-sdk/client-s3");
 
 const { s3 } = require("../utils/s3");
 const AlbumImage = require("../models/albumImage.model");
+const Album = require("../models/album.model");
 const { albumImageValidation } = require("../validation/albumImageValidation");
 const { upload } = require("../middlewares/uploadFile");
 
@@ -64,6 +65,24 @@ router.get("/:id", async (req, res) => {
     }
 
     return res.status(200).json(albumImage);
+  } catch (error) {
+    res.sendStatus(500);
+    throw new Error(error);
+  }
+});
+
+router.get("/album/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const album = await Album.findById(id);
+    if (!album) {
+      return res.status(404).json({ error: "Album not found" });
+    }
+
+    const albumImages = await AlbumImage.find({ albumId: id });
+
+    return res.status(200).json(albumImages);
   } catch (error) {
     res.sendStatus(500);
     throw new Error(error);
